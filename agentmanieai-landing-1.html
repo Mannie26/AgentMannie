@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MannieAI — Custom AI Agents That Work Like Your Best Employee</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E0B0C;
+    --surface: #171213;
+    --surface-hover: #1D1718;
+    --border: #2A2223;
+    --primary: #7C2D3B;
+    --secondary: #9C4A52;
+    --text: #F5F1EF;
+    --muted: #A69A97;
+    --success: #7C9270;
+    --danger: #A83B4A;
+    --radius: 10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* Background ambience */
+  .bg-glow{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(600px circle at 15% 10%, rgba(124,45,59,0.10), transparent 60%),
+      radial-gradient(700px circle at 90% 25%, rgba(156,74,82,0.08), transparent 60%);
+  }
+  .grid-overlay{
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.35;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(ellipse 100% 60% at 50% 0%, black 40%, transparent 100%);
+  }
+
+  /* Nav */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(11,15,25,0.75);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  nav .inner{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-0.01em;}
+  .logo-mark{
+    width:28px;height:28px;border-radius:8px;
+    background:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;flex-shrink:0;
+  }
+  .logo-mark::after{
+    content:'';position:absolute;width:6px;height:6px;border-radius:50%;
+    background:var(--success);top:-2px;right:-2px;
+    box-shadow:0 0 8px var(--success);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.85);}}
+  .nav-cta{
+    background:var(--text);color:var(--bg);font-weight:600;font-size:13.5px;
+    padding:9px 18px;border-radius:8px;transition:transform .15s ease, opacity .15s ease;
+  }
+  .nav-cta:hover{transform:translateY(-1px);opacity:0.9;}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-weight:600;font-size:15px;padding:14px 26px;border-radius:9px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+    cursor:pointer;border:1px solid transparent;white-space:nowrap;
+  }
+  .btn-primary{
+    background:var(--primary);
+    color:#fff;box-shadow:0 8px 20px -8px rgba(124,45,59,0.5);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px -8px rgba(124,45,59,0.55);}
+  .btn-secondary{
+    background:transparent;color:var(--text);border-color:var(--border);
+  }
+  .btn-secondary:hover{background:var(--surface-hover);border-color:#2e3750;}
+
+  /* Section shell */
+  section{position:relative;z-index:1;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;
+    color:var(--secondary);letter-spacing:0.02em;
+    background:rgba(124,45,59,0.10);border:1px solid rgba(124,45,59,0.28);
+    padding:6px 12px;border-radius:100px;margin-bottom:20px;
+  }
+  .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 6px var(--success);}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:88px 0 96px;}
+  .hero-grid{
+    display:grid;grid-template-columns:1.05fr 0.95fr;gap:64px;align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(34px, 4.6vw, 56px);
+    font-weight:800;line-height:1.06;letter-spacing:-0.025em;
+    margin-bottom:22px;
+  }
+  .hero h1 .accent{
+    color:var(--secondary);
+  }
+  .hero p.sub{
+    font-size:18px;color:var(--muted);max-width:520px;margin-bottom:34px;line-height:1.6;
+  }
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px;}
+  .hero-trust{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13.5px;}
+  .hero-trust .avatars{display:flex;}
+  .hero-trust .avatars span{
+    width:26px;height:26px;border-radius:50%;border:2px solid var(--bg);
+    background:var(--primary);margin-left:-8px;
+  }
+  .hero-trust .avatars span:first-child{margin-left:0;}
+
+  .video-card{
+    position:relative;border-radius:16px;overflow:hidden;
+    border:1px solid var(--border);background:var(--surface);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+  }
+  .video-frame{
+    position:relative;aspect-ratio:16/9;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(124,45,59,0.14), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(156,74,82,0.12), transparent 55%),
+      #10141F;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .play-btn{
+    width:68px;height:68px;border-radius:50%;
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .play-btn:hover{transform:scale(1.08);background:rgba(255,255,255,0.1);}
+  .play-btn svg{margin-left:4px;}
+  .video-label{
+    position:absolute;bottom:16px;left:16px;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);
+    background:rgba(11,15,25,0.6);border:1px solid var(--border);
+    padding:5px 10px;border-radius:6px;
+  }
+  .video-caption{padding:16px 18px;border-top:1px solid var(--border);}
+  .video-caption p{font-size:13.5px;color:var(--muted);}
+  .video-caption strong{color:var(--text);}
+
+  /* ---------- PROBLEM ---------- */
+  .problem{padding:100px 0;border-top:1px solid var(--border);}
+  .section-head{max-width:640px;margin-bottom:56px;}
+  .section-head h2{
+    font-size:clamp(28px,3.4vw,40px);font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-bottom:16px;
+  }
+  .section-head p{font-size:16.5px;color:var(--muted);line-height:1.65;}
+
+  .problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .problem-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:30px 26px;transition:border-color .2s ease, transform .2s ease;
+    position:relative;overflow:hidden;
+  }
+  .problem-card:hover{border-color:#3a2530;transform:translateY(-3px);}
+  .problem-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg, transparent, rgba(168,59,74,0.5), transparent);
+    opacity:0;transition:opacity .2s ease;
+  }
+  .problem-card:hover::before{opacity:1;}
+  .problem-icon{
+    width:42px;height:42px;border-radius:10px;
+    background:rgba(168,59,74,0.08);border:1px solid rgba(168,59,74,0.25);
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+  }
+  .problem-card h3{font-size:17.5px;font-weight:700;margin-bottom:10px;letter-spacing:-0.01em;}
+  .problem-card p{font-size:14.5px;color:var(--muted);line-height:1.6;}
+  .problem-stat{
+    margin-top:18px;padding-top:16px;border-top:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#f0808c;
+  }
+
+  /* ---------- SOLUTION ---------- */
+  .solution{padding:100px 0 110px;border-top:1px solid var(--border);}
+  .solution-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;}
+
+  .benefit-list{display:flex;flex-direction:column;gap:4px;}
+  .benefit-item{
+    display:flex;gap:16px;padding:18px 4px;border-bottom:1px solid var(--border);
+  }
+  .benefit-item:last-child{border-bottom:none;}
+  .benefit-check{
+    flex-shrink:0;width:26px;height:26px;border-radius:7px;margin-top:2px;
+    background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .benefit-item h4{font-size:15.5px;font-weight:700;margin-bottom:4px;letter-spacing:-0.005em;}
+  .benefit-item p{font-size:14px;color:var(--muted);line-height:1.55;}
+
+  .booking-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    overflow:hidden;position:sticky;top:96px;
+  }
+  .booking-head{padding:24px 24px 0;}
+  .booking-head h3{font-size:18px;font-weight:700;margin-bottom:6px;}
+  .booking-head p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
+  .calendly-embed{
+    margin:0 24px 24px;border-radius:10px;overflow:hidden;
+    background:#10141F;border:1px solid var(--border);
+  }
+  .calendly-embed .calendly-inline-widget{width:100%;}
+
+  /* CTA banner */
+  .cta-banner{
+    margin-top:88px;border-radius:20px;padding:56px 48px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(124,45,59,0.16), transparent 55%),
+      radial-gradient(circle at 85% 75%, rgba(156,74,82,0.14), transparent 55%),
+      var(--surface);
+    border:1px solid var(--border);
+    text-align:center;
+  }
+  .cta-banner h2{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;}
+  .cta-banner p{font-size:16px;color:var(--muted);max-width:560px;margin:0 auto 32px;line-height:1.6;}
+  .cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;}
+  .cta-note{margin-top:18px;font-size:12.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+  footer{border-top:1px solid var(--border);padding:32px 0;}
+  footer .inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  footer p{font-size:13px;color:var(--muted);}
+
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr;gap:44px;}
+    .problem-grid{grid-template-columns:1fr;}
+    .solution-grid{grid-template-columns:1fr;gap:40px;}
+    .booking-card{position:static;}
+    .cta-banner{padding:40px 24px;}
+    nav .inner{padding:14px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="grid-overlay"></div>
+
+<nav>
+  <div class="inner">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      MannieAI
+    </div>
+    <a href="#book" class="nav-cta">Book a Call</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow"><span class="eyebrow-dot"></span>Remote • Serving Clients Worldwide</div>
+      <h1>Stop wasting time on repetitive work. Let an <span class="accent">AI agent</span> handle it for you.</h1>
+      <p class="sub">We build custom AI agents for businesses that automate customer support, sales, scheduling, and everyday operations — helping you save time, reduce costs, and scale faster.</p>
+      <div class="hero-actions">
+        <a href="#book" class="btn btn-primary">Book a Free Strategy Call</a>
+        <a href="#problem" class="btn btn-secondary">See How It Works</a>
+      </div>
+      <div class="hero-trust">
+        <div class="avatars"><span></span><span></span><span></span><span></span></div>
+        Trusted by founders, agencies &amp; growing teams worldwide
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="video-frame">
+        <div class="play-btn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="video-label">▶ YOUTUBE_EMBED</div>
+      </div>
+      <div class="video-caption">
+        <p><strong>Watch:</strong> How a MannieAI agent handles a real customer conversation — 2 min</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROBLEM ============ -->
+<section class="problem" id="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="eyebrow-dot" style="background:#A83B4A;box-shadow:0 0 6px #A83B4A;"></span>The cost of doing it manually</div>
+      <h2>Every hour your team spends on repetitive work is an hour not spent growing the business.</h2>
+      <p>You didn't start this business to answer the same questions all day. But right now, that's exactly where the time is going.</p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A83B4A" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Too many inquiries, not enough hands</h3>
+        <p>Every new customer message competes with the ten you haven't answered yet. Response times slip, and people notice.</p>
+        <div class="problem-stat">→ Slower replies, lower satisfaction</div>
+      </div>
+
+      <div class="problem-card">
+        <div class="problem-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A83B4A" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+        <h3>Leads go cold while you're busy elsewhere</h3>
+        <p>A hot lead asks a question at 9pm. By the time someone gets to it in the morning, they've already booked with a competitor.</p>
+        <div class="problem-stat">→ Lost revenue you never see</div>
+      </div>
+
+      <div class="problem-card">
+        <div class="problem-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A83B4A" stroke-width="1.8"><path d="M3 3v18h18M18.7 8l-5.1 5.1-2.8-2.8L7 14"/></svg>
+        </div>
+        <h3>Hiring more people costs more than it solves</h3>
+        <p>Bringing on staff to cover support, scheduling, or admin work means salaries, training, and management — just to keep up with demand.</p>
+        <div class="problem-stat">→ Growth that eats its own margins</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOLUTION ============ -->
+<section class="solution">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="eyebrow-dot"></span>What changes when you work with us</div>
+      <h2>An AI agent built specifically for your business — not a generic chatbot.</h2>
+      <p>We design, build, and deploy AI agents that plug into how you already operate, then keep improving them after launch.</p>
+    </div>
+
+    <div class="solution-grid">
+      <div class="benefit-list">
+        <div class="benefit-item">
+          <div class="benefit-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9270" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div>
+            <h4>Custom-built for your business</h4>
+            <p>Not a generic chatbot. Every agent is designed around your workflows, tone, and customers from day one.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9270" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div>
+            <h4>End-to-end automation</h4>
+            <p>We don't just answer questions — we automate the complete workflow behind them, start to finish.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9270" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div>
+            <h4>Human-like conversations</h4>
+            <p>Natural, on-brand conversations that sound like a real member of your team, not a scripted bot.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9270" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div>
+            <h4>Fast delivery</h4>
+            <p>Launch within days, not months — so you start seeing time and cost savings almost immediately.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C9270" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div>
+            <h4>Ongoing support</h4>
+            <p>We keep refining your agent after launch, so it gets better as your business changes.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="booking-card" id="book">
+        <div class="booking-head">
+          <h3>Book your free discovery call</h3>
+          <p>30 minutes. We'll map out where an AI agent could save you the most time.</p>
+        </div>
+        <div class="calendly-embed">
+          <!-- Calendly inline widget begin -->
+          <div class="calendly-inline-widget" data-url="https://calendly.com/mannie2612" style="min-width:320px;height:700px;"></div>
+          <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+          <!-- Calendly inline widget end -->
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-banner">
+      <h2>Ready to save hours every week?</h2>
+      <p>Let's build an AI agent that works around the clock, reduces manual work, and helps your business grow without adding more staff.</p>
+      <div class="cta-actions">
+        <a href="#book" class="btn btn-primary">Book Your Free Discovery Call</a>
+      </div>
+      <div class="cta-note">No commitment · 30-minute call · Remote, worldwide</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap inner">
+    <div class="logo"><div class="logo-mark"></div>MannieAI</div>
+    <p>© 2026 MannieAI — Remote, Serving Clients Worldwide</p>
+  </div>
+</footer>
+
+</body>
+</html>
